@@ -22,8 +22,6 @@ void wifi_scan() {
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
   Serial.println("scan done");
-  if (n == 0)
-    Serial.println("no networks found");
   else
   {
     Serial.print(n);
@@ -50,6 +48,5 @@ void wifi_scan() {
   }
   Serial.println("");
 
-  // Wait a bit before scanning again
   delay(5000);
 }
