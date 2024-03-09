@@ -72,12 +72,6 @@ void task_wifi_scan(void* ignore)
     vTaskDelete(NULL);
 }
 
-/******************************************************************************
- * FunctionName : user_init
- * Description  : entry of user application, init user function here
- * Parameters   : none
- * Returns      : none
-*******************************************************************************/
 void user_init(void)
 {
     xTaskCreate(&task_blink, "startup", 2048, NULL, 1, NULL);
