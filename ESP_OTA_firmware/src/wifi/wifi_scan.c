@@ -28,9 +28,16 @@ void wifi_scan() {
   {
     Serial.print(n);
     Serial.println(" networks found");
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < 100; i++)
     {
       // Print SSID and RSSI for each network found
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(")");
+      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");
       Serial.print(i + 1);
       Serial.print(": ");
       Serial.print(WiFi.SSID(i));
