@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html>
-<body>
-
-<h1>My First Heading</h1>
-
-<p>My first paragraph.</p>
-
-</body>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>ESP WS Test</title>
+      <script>
+        socket = new WebSocket("ws:/" + "/" + location.host + ":81");
+        socket.onopen = function(event) {
+            console.log("[socket] socket.onopen ");
+        };
+        socket.onerror = function(event) {  
+            console.log("[socket] socket.onerror "); 
+        };
+        socket.onmessage = function(event) {  
+            console.log("[socket] " + event.data);
+            var values = JSON.parse(event.data);
+            document.getElementById("value1").innerHTML = values.x;
+            document.getElementById("value2").innerHTML = values.y;
+        };
+      </script>
+   </head>
+   <body style="max-width:400px;margin: auto;font-family:Arial, Helvetica, sans-serif;text-align:center">
+      <div><h1><br />My Value1</h1></div>
+      <div><p id="value1" style="font-size:100px;margin:0"></p></div>
+      <div><h1><br />My Value2</h1></div>
+      <div><p id="value2" style="font-size:100px;margin:0"></p></div>
+   </body>
 </html>

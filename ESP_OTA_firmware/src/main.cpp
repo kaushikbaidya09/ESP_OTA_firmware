@@ -1,43 +1,19 @@
 #include <Arduino.h>
-#include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+#include <ESP8266WebServer.h>
+#include <WebSocketsServer.h>
 #include <Hash.h>
 #include <LittleFS.h>
-#include <WebSocketsServer.h>
+// #include <Arduino_JSON.h>
 
 
 String old_value, value;
 
+
 ESP8266WiFiMulti WiFiMulti;
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
-
-char html_template[] PROGMEM = R"=====(
-<html lang="en">
-   <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>ESP WS Test</title>
-      <script>
-        socket = new WebSocket("ws:/" + "/" + location.host + ":81");
-        socket.onopen = function(e) {  console.log("[socket] socket.onopen "); };
-        socket.onerror = function(e) {  console.log("[socket] socket.onerror "); };
-        socket.onmessage = function(e) {  
-            console.log("[socket] " + e.data + e.data);
-            document.getElementById("mrdiy_value1").innerHTML = e.data;
-            document.getElementById("mrdiy_value2").innerHTML = e.data;
-        };
-      </script>
-   </head>
-   <body style="max-width:400px;margin: auto;font-family:Arial, Helvetica, sans-serif;text-align:center">
-      <div><h1><br />My Value1</h1></div>
-      <div><p id="mrdiy_value1" style="font-size:100px;margin:0"></p></div>
-      <div><h1><br />My Value2</h1></div>
-      <div><p id="mrdiy_value2" style="font-size:100px;margin:0"></p></div>
-   </body>
-</html>
-)=====";
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t length) {
@@ -57,23 +33,16 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 
   case WStype_TEXT:
     Serial.printf("[%u] get Text: %s\n", num, payload);
-    // send message to client
-    // webSocket.sendTXT(num, "message here");
-    // send data to all connected clients
-    // webSocket.broadcastTXT("message here");
     break;
 
   case WStype_BIN:
     Serial.printf("[%u] get binary length: %u\n", num, length);
     hexdump(payload, length);
-    // send message to client
-    // webSocket.sendBIN(num, payload, length);
     break;
   }
 }
 
 void handleMain() {
-  // server.send_P(200, "text/html", html_template );
   server.send(200, "text/html", (LittleFS.open("/test.html", "r").readString()) );
 }
 void handleNotFound() {
@@ -113,9 +82,7 @@ void loop() {
   if ((currentMillis - previousMills) >= 100) {
     previousMills = currentMillis;
     counter++;
-    old_value = (String)(counter - 100);
-    value = (String)counter;
-    webSocket.broadcastTXT(old_value);
+    value = "{\"x\":" + (String)(counter - 100) + ", \"y\":" + (String)(counter) + "}";
     webSocket.broadcastTXT(value);
   }
   webSocket.loop();
