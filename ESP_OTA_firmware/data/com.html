@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP WS Console</title>
+    <title>CLI Console</title>
     <style>
         body {
             font-family: monospace;
@@ -36,7 +36,33 @@
             outline: none;
         }
     </style>
+</head>
+
+<body>
+    <div id="console" contenteditable="true" spellcheck="false"></div>
+    <br>
+    <input type="text" id="input" autofocus>
     <script>
+        const consoleDiv = document.getElementById('console');
+        const input = document.getElementById('input');
+
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent line break on Enter
+                const command = input.value.trim();
+                appendToConsole('> ' + command); // Add command to console
+                input.value = ''; // Clear input field
+            }
+        });
+
+        function appendToConsole(text) {
+            const newLine = document.createElement('div');
+            newLine.textContent = text;
+            consoleDiv.appendChild(newLine);
+            // Scroll to bottom of console
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
         socket = new WebSocket("ws:/" + "/" + location.host + ":81");
         socket.onopen = function (event) {
             console.log("[socket] socket.onopen ");
@@ -49,69 +75,14 @@
         socket.onmessage = function (event) {
             console.log("[socket] " + event.data);
             var values = JSON.parse(event.data);
-            document.getElementById("value1").innerHTML = values.x;
-            document.getElementById("value2").innerHTML = values.y;
-            document.getElementById("text").innerHTML = values.txt;
-            // document.getElementById("input").innerHTML = values.txt;
-            const input = values.txt;
-            const command = input.value.trim();
-            appendToConsole('> ' + command);
+            handleWebSocketData(values);
         };
-    </script>
-</head>
 
-<body>
-    <div id="console" contenteditable="true" spellcheck="false">
-    </div>
-    <br>
-    <input type="text" id="input" autofocus>
-
-    <div>
-        <h1><br />My Value1</h1>
-    </div>
-    <div>
-        <p id="value1"></p>
-    </div>
-    <div>
-        <h1><br />My Value2</h1>
-    </div>
-    <div>
-        <p id="value2"></p>
-    </div>
-    <div>
-        <h1><br />Massage</h1>
-    </div>
-    <div>
-        <p id="text"></p>
-    </div>
-
-    <script>
-        const consoleDiv = document.getElementById('console');
-        const input = document.getElementById('input');
-
-        input.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent line break on Enter
-                const command = input.value.trim();
-                appendToConsole('> ' + command); // Add command to console
-                input.value = ''; // Clear input field
-                // Handle the command here (you can send it to a server, process it locally, etc.)
-                // Example:
-                // handleCommand(command);
-            }
-        });
-
-        function appendToConsole(text) {
-            const newLine = document.createElement('div');
-            newLine.textContent = text;
-            consoleDiv.appendChild(newLine);
-            // Scroll to bottom of console
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        }
-
-        // Function to handle command response
-        function handleCommandResponse(response) {
-            appendToConsole(response);
+        // Function to handle data received from WebSocket
+        function handleWebSocketData(data) {
+            // Handle the received JSON data
+            console.log('Received data:', data);
+            appendToConsole('Received data: ' + JSON.stringify(data));
         }
     </script>
 </body>

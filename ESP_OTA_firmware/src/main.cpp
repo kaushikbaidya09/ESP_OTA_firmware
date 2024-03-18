@@ -43,7 +43,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 }
 
 void handleMain() {
-  server.send(200, "text/html", (LittleFS.open("/test.html", "r").readString()) );
+  server.send(200, "text/html", (LittleFS.open("/com.html", "r").readString()) );
 }
 void handleNotFound() {
   server.send(404, "text/html", "<html><body><p>404 Error</p></body></html>");
@@ -79,10 +79,12 @@ uint32_t previousMills = 0;
 uint32_t counter = 0;
 void loop() {
   currentMillis = millis();
-  if ((currentMillis - previousMills) >= 100) {
+  if ((currentMillis - previousMills) >= 10) {
     previousMills = currentMillis;
     counter++;
-    value = "{\"x\":" + (String)(counter - 100) + ", \"y\":" + (String)(counter) + "}";
+    value = "{\"x\":" + (String)(counter - 100)
+            + ",\"y\":" + (String)(counter)
+            + ",\"txt\":" + "\"Hello World!\"" + "}";
     webSocket.broadcastTXT(value);
   }
   webSocket.loop();
