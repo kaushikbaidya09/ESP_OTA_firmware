@@ -46,11 +46,11 @@
 </head>
 
 <body>
-    <div type="text" id="websocketID" contenteditable="false"><p> WebSocket ID : "NOT CONNECTED!" </p></div>
+    <div type="text" id="websocketID" contenteditable="false"> WebSocket ID : "NOT CONNECTED!" </div>
     <label>User ID : </label>
     <input type="text" id="UserName">
     <br>
-    <div id="console" contenteditable="true" spellcheck="false"></div>
+    <div id="console" contenteditable="false" spellcheck="false"></div>
     <br>
     <input type="text" id="input" autofocus>
     <script>
@@ -78,7 +78,8 @@
             console.log('Received data:', data);
             // appendToConsole('' + JSON.stringify(data));
             if (data.id) {
-                websocketIdDiv.innerHTML = 'WebSocket ID : ' + data.ID;
+                console.log("[socket] ID " + data.id);
+                websocketIdDiv.innerHTML = 'WebSocket ID : ' + data.id;
                 // appendToConsole(data.id);
             }
             if (data.user) {

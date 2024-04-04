@@ -1,72 +1,76 @@
-#include <Arduino.h>
-#include <ESP8266WiFiMulti.h>
-#include <ESP8266WebServer.h>
-#include <WebSocketsServer.h>
-#include <Hash.h>
-#include <LittleFS.h>
-#include <ArduinoJson.h>
+#include "main.h"
 
-// Allocate the JSON document
-JsonDocument JSON_variable;
-String value;
+// void checkForUpdates() {
+//     // Make a HTTP request to GitHub API to get latest release information
+//     HTTPClient http;
+//     http.begin(repositoryURL);
+//     int httpResponseCode = http.GET();
+    
+//     if (httpResponseCode == HTTP_CODE_OK) {
+//         String payload = http.getString();
+//         http.end();
 
-/* Global Variable Instances */
-bool ws_connected = false;      /* Websocket Connected Flag */
+//         // Parse JSON response
+//         DynamicJsonDocument jsonBuffer(1024);
+//         deserializeJson(jsonBuffer, payload);
 
-ESP8266WiFiMulti WiFiMulti;
-ESP8266WebServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(81);
+//         const char* latestVersion = jsonBuffer["tag_name"];
+//         if (strcmp(latestVersion, firmwareVersion) > 0) {
+//             Serial.println("New firmware version available!");
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
-    switch (type) {
-        case WStype_DISCONNECTED:
-            ws_connected = false;
-            Serial.printf("[%u] Disconnected!\n", num);
-            break;
+//             // Download the new firmware binary
+//             char firmwareDownloadURL[256];
+//             sprintf(firmwareDownloadURL, firmwareURL, latestVersion);
+//             Serial.print("Downloading firmware from: ");
+//             Serial.println(firmwareDownloadURL);
 
-        case WStype_CONNECTED: {
-            ws_connected = true;
-            IPAddress ip = webSocket.remoteIP(num);
-            Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-            // webSocket.sendTXT(num, "0");    /* send message to client */
-            String ID = "{ \"id\" : " + (String)num + " }";
-            webSocket.sendTXT(num, ID);    /* send message to client */
-        } break;
+//             t_httpUpdate_return ret = ESPhttpUpdate.update(firmwareDownloadURL);
+//             if (ret == HTTP_UPDATE_OK) {
+//                 Serial.println("Firmware update successful!");
+//                 // Reset or perform necessary actions after successful update
 
-        case WStype_TEXT:
-            Serial.printf("[%u] get Text: %s\n", num, payload);
-            // webSocket.sendTXT(0, payload);    /* send message to client */
-            webSocket.broadcastTXT(payload);
-            break;
+//                 // Update file system data
+//                 updateFileSystem();
+//             } else {
+//                 Serial.print("Firmware update failed, error: ");
+//                 Serial.println(ESPhttpUpdate.getLastError());
+//             }
+//         } else {
+//             Serial.println("Firmware is up to date!");
+//         }
+//     } else {
+//         Serial.print("Failed to connect to GitHub API, error: ");
+//         Serial.println(httpResponseCode);
+//     }
+// }
 
-        case WStype_BIN:
-            Serial.printf("[%u] get binary length: %u\n", num, length);
-            hexdump(payload, length);
-            break;
-        case WStype_ERROR:
-            break;
-        case WStype_FRAGMENT_TEXT_START:
-            break;
-        case WStype_FRAGMENT_BIN_START:
-            break;
-        case WStype_FRAGMENT:
-            break;
-        case WStype_FRAGMENT_FIN:
-            break;
-        case WStype_PING:
-            break;
-        case WStype_PONG:
-            break;
-    }
-}
+// void updateFileSystem() {
+//     // Make a HTTP request to download the file
+//     HTTPClient http;
+//     http.begin(fileURL);
+//     int httpResponseCode = http.GET();
+    
+//     if (httpResponseCode == HTTP_CODE_OK) {
+//         File file = LittleFS.open("/data.txt", "w");
+//         if (!file) {
+//             Serial.println("Failed to open file for writing");
+//             return;
+//         }
+        
+//         String payload = http.getString();
+//         file.print(payload);
+//         file.close();
+        
+//         Serial.println("File system data updated successfully!");
+//     } else {
+//         Serial.print("Failed to download file, error: ");
+//         Serial.println(httpResponseCode);
+//     }
+// }
 
-void handleMain() {
-    server.send(200, "text/html", (LittleFS.open("/com.html", "r").readString()) );
-}
-void handleNotFound() {
-    server.send(404, "text/html", "<html><body><p>404 Error</p></body></html>");
-}
-
+/*************************************************************************************************/
+/* Application Entry Function                                                                    */
+/*************************************************************************************************/
 void setup() {
 
     /* Initialize the Debug Print Serial Port */
@@ -85,42 +89,22 @@ void setup() {
     }
     delay(1000);
 
-    deserializeJson(JSON_variable, " ");                              /* Deserialize String into JSON Format (Used as to Clear JSON Object) */
-    JSON_variable["msg"] = "Massage will be displayed here!";         /* Add Massage to JSON object */
-    JSON_variable["val"] = 0;                                         /* Add Key Value Pair to JSON Object */
-    JSON_variable["val2"] = (int)(JSON_variable["val"]) * 1000;       /* Update JSON Object Key Value Pair */
-    serializeJson(JSON_variable, Serial); Serial.println(" ");        /* Serialize JSON Object in one single line */
-    serializeJsonPretty(JSON_variable, Serial); Serial.println(" ");  /* Serialize JSON Object in Formated String */
-
-    /* List Of WiFi Credentials, Connected to when ever available */
-    WiFiMulti.addAP("Lakshmi 5th floor", "8247096672");
-    Serial.print("Connecting to Wifi.");
-    while (WiFiMulti.run() != WL_CONNECTED) {
-        Serial.print(".");
-        delay(100);
-    }
-
-    Serial.print("\nConnected. IP ");
-    Serial.println(WiFi.localIP());           /* Print WiFi IP_Address to Serial Monitor */
-    webSocket.begin();                        /* Begin Web Socket Communication */
-    webSocket.onEvent(webSocketEvent);        /* Web Socket Event Handler */
-    server.on("/", handleMain);               /* Host Web Page Requested */
-    server.onNotFound(handleNotFound);        /* Page Handler if page not found */
-    server.begin();                           /* Start Web Server */
+    wifi_init();
+    server_init();
+    // mqtt_init();
 }
 
-uint32_t currentMillis = 0;
-uint32_t previousMills = 0;
-uint32_t counter = 0;
+/*************************************************************************************************/
+/* Application Main Loop                                                                         */
+/*************************************************************************************************/
 void loop() {
-    // delay(1000);
-    // // value = "{\"msg\" : \"Hello World\", \"val\" : 10 }";
-    // if(ws_connected){
-    //     JSON_variable["val"] = (int)(JSON_variable["val"]) + 1;
-    //     serializeJson(JSON_variable, value);
-    //     webSocket.broadcastTXT(value);
-    //     // Serial.println(value);
-    // }
-    webSocket.loop();
-    server.handleClient();
+    // String payload;
+    // deserializeJson(JSON_variable, " ");                              /* Deserialize String into JSON Format (Used as to Clear JSON Object) */
+    // JSON_variable["user"] = "ESP_Serial";                             /* Add Massage to JSON object */
+    // JSON_variable["msg"] = "Massage will be displayed here!";         /* Add Key Value Pair to JSON Object */
+    // serializeJson(JSON_variable, payload); // Serial.println(" ");        /* Serialize JSON Object in one single line */
+    // serializeJsonPretty(JSON_variable, Serial); Serial.println(" ");  /* Serialize JSON Object in Formated String */
+    //webSocket.broadcastTXT(payload);
+
+    wifi_server();
 }
