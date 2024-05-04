@@ -9,7 +9,6 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 bool ws_connected = false;
 JsonDocument JSON_variable;
 
-
 /*************************************************************************************************/
 /* WebSocket Event Callback Function                                                             */
 /*************************************************************************************************/
@@ -32,7 +31,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         case WStype_TEXT:
             Serial.printf("[%u] get Text: %s\n", num, payload);
             // webSocket.sendTXT(0, payload);    /* send message to client */
-            webSocket.broadcastTXT(payload);
+            webSocket.broadcastTXT(payload);     /* Echo recieved data */
+            deserializeJson(JSON_variable, payload);
+            // if (JSON_variable["user"] == "KB") {
+            //     webSocket.broadcastTXT(payload); /* Echo again if matched the condition */
+            // }
             break;
 
         case WStype_BIN:
