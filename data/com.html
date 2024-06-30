@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Console</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+        }
+
+        #console {
+            width: 100%;
+            height: 300px;
+            /* Adjust height as needed */
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 10px;
+            overflow-y: auto;
+            resize: none;
+        }
+
+        #input {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 10px;
+            font-family: monospace;
+            font-size: inherit;
+            outline: none;
+        }
+
+        #UserName {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            resize: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div type="text" id="websocketID" contenteditable="false"> WebSocket ID : "NOT CONNECTED!" </div>
+    <label>User ID : </label>
+    <input type="text" id="UserName">
+    <br>
+    <div id="console" contenteditable="false" spellcheck="false"></div>
+    <br>
+    <input type="text" id="input" autofocus>
+    <script>
+        const consoleDiv     = document.getElementById('console');
+        const inputDiv       = document.getElementById('input');
+        const websocketIdDiv = document.getElementById('websocketID');
+        const userNameDiv    = document.getElementById('UserName');
+        // var user_name = "user_x";
+        let socket;
+
+        /* CLI Input Event Handler Function */
+        inputDiv.addEventListener('keydown', function (input_event) {
+            if (input_event.key === 'Enter') {
+                input_event.preventDefault();                   /* Prevent Line Break on Enter */
+                const command = inputDiv.value.trim();             /* Trim Entered Input String */
+                // appendToConsole(userNameDiv.value.trim() + '> ' + command);                /* Add Command to Console */
+                inputDiv.value = '';                               /* Clear Input Command Box */
+                const jsonData = { user : userNameDiv.value, msg : command };             /* JSON Formated Data */
+                sendJsonData(jsonData);                         /* Send Data to Device */
+            }
+        });
+
+        /* Web Socket Event Data Handler Function */
+        function handleWebSocketData(data) {
+            console.log('Received data:', data);
+            // appendToConsole('' + JSON.stringify(data));
+            if (data.id) {
+                console.log("[socket] ID " + data.id);
+                websocketIdDiv.innerHTML = 'WebSocket ID : ' + data.id;
+                // appendToConsole(data.id);
+            }
+            if (data.user) {
+                appendToConsole(data.user + '> ' + data.msg);
+            }
+        }
+
+        /* Function to Add User Input Command to Console Text View Box */
+        function appendToConsole(text) {
+            const newLine = document.createElement('div');
+            newLine.textContent = text;
+            consoleDiv.appendChild(newLine);                    /* Add Content to div class */
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;     /* Scroll to bottom of console */
+        }
+
+        /* Web Socket Communication and Socket Event Handler Function */
+        socket = new WebSocket("ws:/" + "/" + location.host + ":81");
+        socket.onopen = function (onOpen_event) {              /* Web Socket ON_BEGIN Callback Function */
+            console.log("[socket] socket.onopen ");
+        };
+        socket.onerror = function (onError_event) {            /* Web Socket ON_ERROR Callback Function */
+            console.log("[socket] socket.onerror ");
+        };
+        socket.onmessage = function (onMsg_event) {            /* Web Socket ON_MASSAGE Callback Function */
+            console.log("[socket] " + onMsg_event.data);
+            var values = JSON.parse(onMsg_event.data);
+            handleWebSocketData(values);
+        };
+
+        /* Function to Send JSON Data to Device */
+        function sendJsonData(JSON_data) {
+            if (socket.readyState === WebSocket.OPEN){
+                socket.send(JSON.stringify(JSON_data));
+            }
+            else{
+                console.error('WebSocket connection not open.');
+            }
+
+        }
+    </script>
+</body>
+
+</html>
