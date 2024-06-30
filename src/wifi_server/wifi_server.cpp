@@ -62,7 +62,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 void handleMain() {
     server.send(200, "text/html", (LittleFS.open("/test.html", "r").readString()) );
 }
-void handleCli() {
+void handleConsole() {
     server.send(200, "text/html", (LittleFS.open("/com.html", "r").readString()) );
 }
 void handleNotFound() {
@@ -72,7 +72,7 @@ void handleNotFound() {
 void server_init(void) {
     /* Start Web Server & Establish WebSocket Communication */
     server.on("/", handleMain);               /* Host Web Page Requested */
-    server.on("/cli", handleCli);            /* Host Web Page Requested */
+    server.on("/console", handleConsole);            /* Host Web Page Requested */
     server.onNotFound(handleNotFound);        /* Page Handler if page not found */
     server.begin();                           /* Start Web Server */
     webSocket.begin();                        /* Begin Web Socket Communication */
@@ -95,7 +95,7 @@ void wifi_init(void) {
     WiFi.mode(WIFI_STA);
     WiFi.mode(WIFI_AP);
     WiFiMulti.addAP("KBs GT 2 Pro", "24681355");
-    WiFiMulti.addAP("Lakshmi 5th floor", "8247096672");
+    WiFiMulti.addAP("Lakshmi5thfloor", "8247096672");
 
         /* WiFi.scanNetworks will return the number of networks found */
     Serial.println("Scanning for available networks . . . ");
