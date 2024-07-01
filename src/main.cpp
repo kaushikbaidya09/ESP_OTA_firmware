@@ -8,6 +8,7 @@ void setup() {
     /* Initialize the Debug Print Serial Port */
     Serial.begin(9600);
 
+    delay(1000);
     Serial.println("\n| |/ /                  | |    (_)| |   ( )     \\ \\        / /(_)|  ____|(_)   / ____|| |     |_   _|");
     Serial.println("| ' /  __ _  _   _  ___ | |__   _ | | __|/ ___   \\ \\  /\\  / /  _ | |__    _   | |     | |       | |  ");
     Serial.println("|  <  / _` || | | |/ __|| '_ \\ | || |/ /  / __|   \\ \\/  \\/ /  | ||  __|  | |  | |     | |       | |  ");
@@ -19,10 +20,19 @@ void setup() {
         Serial.println("An Error has occurred while mounting LittleFS");
         return;
     }
+    Serial.println("Mounted LittleFS!");
     delay(1000);
 
+    /* Initialize and connect to WiFi */
+    Serial.println("Establishing WiFi Connection");
     wifi_init();
+
+    /* Setup sebsocket connection */
+    Serial.println("Establishing webserver over websocket");
     server_init();
+
+    /* Setup MQTT connection */
+    // Serial.println("Establishing MQTT Connection");
     // mqtt_init();
 }
 

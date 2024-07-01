@@ -16,20 +16,20 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     switch (type) {
         case WStype_DISCONNECTED:
             ws_connected = false;
-            Serial.printf("[%u] Disconnected!\n", num);
+            Serial.printf("WebSocket Event: WStype_DISCONNECTED: [%u] Disconnected!\n", num);
             break;
 
         case WStype_CONNECTED: {
             ws_connected = true;
             IPAddress ip = webSocket.remoteIP(num);
-            Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+            Serial.printf("WebSocket Event: WStype_CONNECTED: [%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
             // webSocket.sendTXT(num, "0");    /* send message to client */
             String ID = "{ \"id\" : " + (String)(num + 1) + " }";
             webSocket.sendTXT(num, ID);    /* send message to client */
         } break;
 
         case WStype_TEXT:
-            Serial.printf("[%u] get Text: %s\n", num, payload);
+            Serial.printf("WebSocket Event: WStype_TEXT: [%u] get Text: %s\n", num, payload);
             // webSocket.sendTXT(0, payload);    /* send message to client */
             webSocket.broadcastTXT(payload);     /* Echo recieved data */
             deserializeJson(JSON_variable, payload);
@@ -39,33 +39,43 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             break;
 
         case WStype_BIN:
-            Serial.printf("[%u] get binary length: %u\n", num, length);
+            Serial.printf("WebSocket Event: WStype_BIN: [%u] get binary length: %u\n", num, length);
             hexdump(payload, length);
             break;
         case WStype_ERROR:
+            Serial.printf("WebSocket Event: WStype_ERROR\n");
             break;
         case WStype_FRAGMENT_TEXT_START:
+            Serial.printf("WebSocket Event: WStype_FRAGMENT_TEXT_START\n");
             break;
         case WStype_FRAGMENT_BIN_START:
+            Serial.printf("WebSocket Event: WStype_FRAGMENT_BIN_START\n");
             break;
         case WStype_FRAGMENT:
+            Serial.printf("WebSocket Event: WStype_FRAGMENT\n");
             break;
         case WStype_FRAGMENT_FIN:
+            Serial.printf("WebSocket Event: WStype_FRAGMENT_FIN\n");
             break;
         case WStype_PING:
+            Serial.printf("WebSocket Event: WStype_PING\n");
             break;
         case WStype_PONG:
+            Serial.printf("WebSocket Event: WStype_PONG\n");
             break;
     }
 }
 
 void handleMain() {
+    Serial.printf("Server: handleMain\n");
     server.send(200, "text/html", (LittleFS.open("/test.html", "r").readString()) );
 }
 void handleConsole() {
+    Serial.printf("Server: handleConsole\n");
     server.send(200, "text/html", (LittleFS.open("/com.html", "r").readString()) );
 }
 void handleNotFound() {
+    Serial.printf("Server: handleNotFound\n");
     server.send(404, "text/html", "<html><body><h1>404 Page Not Found<h1></body></html>");
 }
 
