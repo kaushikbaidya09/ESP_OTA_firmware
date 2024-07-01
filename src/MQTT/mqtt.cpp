@@ -1,4 +1,4 @@
-#include "../main.h"
+#include "main.hpp"
 
 /* MQTT Broker */
 // const char *mqtt_broker = "dfe88d08.ala.us-east-1.emqxsl.com"; /* broker address */
