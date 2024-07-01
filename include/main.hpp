@@ -6,5 +6,7 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 #include "wifi_server.hpp"
 #include "mqtt.hpp"

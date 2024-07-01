@@ -31,6 +31,9 @@ void setup() {
     Serial.println("Establishing webserver over websocket");
     server_init();
 
+    Serial.println("Setup NTP time");
+    ntpClinet_init();
+
     /* Setup MQTT connection */
     // Serial.println("Establishing MQTT Connection");
     // mqtt_init();
@@ -49,4 +52,6 @@ void loop() {
     //webSocket.broadcastTXT(payload);
 
     wifi_server();
+
+    get_ntpTime();
 }
